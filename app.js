@@ -1,49 +1,52 @@
-const http = require('http');
-const httpProxy = require('http-proxy');
+const express = require('express');
+const axios = require('axios');
 
-// Define the target server to which requests will be proxied
-let target = 'https://api-phonetime.horisen.pro'; // Replace with your target server URL
+const app = express();
+const port = 3004;
 
-// Create a proxy server
-const proxy = httpProxy.createProxyServer({});
+// Define the default target server to which requests will be proxied
+let target = 'https://api-phonetime.horisen.pro'; // Replace with your default target server URL
 
-// Create a regular HTTP server
-const server = http.createServer((req, res) => {
+app.use(express.json()); // Enable JSON parsing middleware
+
+// Define a route for handling all incoming requests
+app.all('*', async (req, res) => {
     // Log the incoming request URL for demonstration purposes
     console.log(`Request received for: ${req.url}`);
 
+    // Determine the target dynamically based on the request
     if (req.url && req.url.includes('access-token')) {
         target = 'https://accounts-phonetime.horisen.pro';
     }
-    console.log(target);
-    // Proxy the request to the target server
-    proxy.web(req, res, { target });
+
+    try {
+        const url = target + req.url;
+        const headers = {
+            ...req.headers
+        };
+
+        if (req.headers.authorization) {
+            headers['authorization'] = req.headers.authorization;
+        }
+
+        const response = await axios({
+            method: req.method,
+            url: url,
+            params: req.params,
+            data: req.body,
+            headers: headers
+        });
+
+        if (response) {
+            res.status(response.status).send(response.data);
+        }
+    } catch (error) {
+        console.error('Error:', error.message);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
-// Log proxy request and target details
-proxy.on('proxyReq', (proxyReq, req, res) => {
-    console.log(`Proxying request to: ${proxyReq.getHeader('host')}${proxyReq.url}`);
-    console.log(`Request url: ${proxyReq.getHeader('host')}${req.url}`);
-});
-
-// Log details about the response from the target server
-proxy.on('proxyRes', (proxyRes, req, res) => {
-    console.log(`Received response with status code: ${proxyRes.statusCode}`);
-    // You can log more details about the response headers if needed
-    console.log(`Response headers: ${JSON.stringify(proxyRes.headers)}`);
-});
-
-// Handle proxy errors
-proxy.on('error', (err, req, res) => {
-    console.error('Proxy Error:', err);
-    res.writeHead(500, {
-        'Content-Type': 'text/plain',
-    });
-    res.end('Proxy Error');
-});
-
-// Listen on a specific port
-const port = 3004; // Replace with your desired port
-server.listen(port, () => {
+// Listen on the specified port
+app.listen(port, () => {
     console.log(`Proxy server is listening on port ${port}`);
 });
