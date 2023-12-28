@@ -2,7 +2,7 @@ const http = require('http');
 const httpProxy = require('http-proxy');
 
 // Define the target server to which requests will be proxied
-const target = 'https://api-phonetime.horisen.pro'; // Replace with your target server URL
+let target = 'https://api-phonetime.horisen.pro'; // Replace with your target server URL
 
 // Create a proxy server
 const proxy = httpProxy.createProxyServer({});
@@ -12,6 +12,9 @@ const server = http.createServer((req, res) => {
     // Log the incoming request URL for demonstration purposes
     console.log(`Request received for: ${req.url}`);
 
+    if (req.url && req.url.includes('access-token')) {
+        target = 'https://accounts-phonetime.horisen.pro';
+    }
     // Proxy the request to the target server
     proxy.web(req, res, { target });
 });
