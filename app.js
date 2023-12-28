@@ -29,15 +29,19 @@ app.all('*', async (req, res) => {
             headers['authorization'] = req.headers.authorization;
         }
 
+        // Handle query parameters
+        const queryParams = new URLSearchParams(req.query);
+        const queryString = queryParams.toString();
+
         const params = {
             method: req.method,
-            url: url,
-            query: req.query,
-            params: req.params,
+            url: queryString ? `${url}?${queryString}` : url,
             data: req.body,
             headers: headers
         };
+
         console.log('Request params: ', params);
+
         const response = await axios(params);
 
         if (response) {
