@@ -32,6 +32,7 @@ app.all('*', async (req, res) => {
         const params = {
             method: req.method,
             url: url,
+            query: req.query,
             params: req.params,
             data: req.body,
             headers: headers
