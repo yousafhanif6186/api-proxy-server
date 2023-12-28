@@ -29,13 +29,15 @@ app.all('*', async (req, res) => {
             headers['authorization'] = req.headers.authorization;
         }
 
-        const response = await axios({
+        const params = {
             method: req.method,
             url: url,
             params: req.params,
             data: req.body,
             headers: headers
-        });
+        };
+        console.log('Request params: ', params);
+        const response = await axios(params);
 
         if (response) {
             res.status(response.status).send(response.data);
