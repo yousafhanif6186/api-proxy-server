@@ -20,6 +20,18 @@ const server = http.createServer((req, res) => {
     proxy.web(req, res, { target });
 });
 
+// Log proxy request and target details
+proxy.on('proxyReq', (proxyReq, req, res) => {
+    console.log(`Proxying request to: ${proxyReq.getHeader('host')}${req.url}`);
+});
+
+// Log details about the response from the target server
+proxy.on('proxyRes', (proxyRes, req, res) => {
+    console.log(`Received response with status code: ${proxyRes.statusCode}`);
+    // You can log more details about the response headers if needed
+    console.log(`Response headers: ${JSON.stringify(proxyRes.headers)}`);
+});
+
 // Handle proxy errors
 proxy.on('error', (err, req, res) => {
     console.error('Proxy Error:', err);
