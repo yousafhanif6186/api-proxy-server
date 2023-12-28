@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const querystring = require('querystring');
 
 const app = express();
 const port = 3004;
@@ -33,11 +34,17 @@ app.all('*', async (req, res) => {
         const queryParams = new URLSearchParams(req.query);
         const queryString = queryParams.toString();
 
+        // Handle request data (body)
+        const bodyData = req.method === 'POST' ? querystring.stringify(req.body) : null;
+
         const params = {
             method: req.method,
             url: queryString ? `${url}?${queryString}` : url,
-            data: req.body,
-            headers: headers
+            data: bodyData || req.body,
+            headers: {
+                ...headers,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
         };
 
         console.log('Request params: ', params);
