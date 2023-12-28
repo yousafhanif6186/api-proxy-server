@@ -15,6 +15,7 @@ const server = http.createServer((req, res) => {
     if (req.url && req.url.includes('access-token')) {
         target = 'https://accounts-phonetime.horisen.pro';
     }
+    console.log(target);
     // Proxy the request to the target server
     proxy.web(req, res, { target });
 });
