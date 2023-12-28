@@ -22,7 +22,8 @@ const server = http.createServer((req, res) => {
 
 // Log proxy request and target details
 proxy.on('proxyReq', (proxyReq, req, res) => {
-    console.log(`Proxying request to: ${proxyReq.getHeader('host')}${req.url}`);
+    console.log(`Proxying request to: ${proxyReq.getHeader('host')}${proxyReq.url}`);
+    console.log(`Request url: ${proxyReq.getHeader('host')}${req.url}`);
 });
 
 // Log details about the response from the target server
